@@ -15,9 +15,9 @@ vignette: >
 
 ## Instructor(s) name(s) and contact information
 
-Chloe Mirzayi, cmirzayi@gmail.com
+Chloe Mirzayi, [cmirzayi\@gmail.com](mailto:cmirzayi@gmail.com){.email}
 
-Levi Waldron, levi.waldron@sph.cuny.edu
+Levi Waldron, [levi.waldron\@sph.cuny.edu](mailto:levi.waldron@sph.cuny.edu){.email}
 
 CUNY School of Public Health, 55 W 125th St, New York, NY 111027
 
@@ -37,10 +37,13 @@ How do we know our potential cause brought about an effect or a result? Perhaps 
 
 Despite this, humans (and animals) tend to have a relatively intuitive understanding of causation when we observe it directly. When I burn my finger while cooking, I know what caused it--my finger coming into contact with a hot stove. I could also trace the causal pathway backward and identify what caused my finger to come into contact with the hot stove in the first place--such as my motivation to cook dinner or me being distracted by the antics of my cat.
 
-**Example:** My cat, who I adopted in 2017, has quickly learned that jumping on my kitchen table while I’m eating results in him getting a spritz of water with a spray bottle--but only if the spray bottle is within reach. **What potential causal variables could my cat be considering when he decides to jump on the table?**
+**Question:** My cat has learned that jumping on my kitchen table while I'm eating results in him getting a spritz of water with a spray bottle--but only if the spray bottle is within reach. **What potential causal variables could my cat be considering when he decides to jump on the table?**
+
+**Question:** Now that we have discussed what a cause is in the context of daily life. What are some causes we may be interested in within the context of Bioinformatics (or your field of work/study)?
 
 ## The counterfactual definition of a cause
-However, the nature of much of the work I (and probably most of you) do does not allow us to directly observe what caused an event of interest. Instead we must rely on inferences we draw from our data to establish an argument for a particular causal mechanism or pathway. 
+
+However, the nature of much of the work I and many Bioinformaticians do does not allow us to directly observe what caused an event of interest. Instead we must rely on inferences we draw from our data to establish an argument for a particular causal mechanism or pathway.
 
 Rather than relying on vague dictionary definitions or me talking at length about my cat to inform the science of causal inference, the most commonly accepted definition of a cause in modern epidemiology is based on a counterfactual: *what would have happened had the event of interest had the exposure not occurred*.
 
@@ -48,7 +51,7 @@ But that's not very intuitive or easy to parse so let's consider an example:
 
 ### Example: A dog and an ambulance
 
-An ambulance drives by a house with its sirens on. A dog in the house barks. We can ask the causal question in a straightforward way: **Did the ambulance driving by the house cause the dog to bark?** 
+An ambulance drives by a house with its sirens on. A dog in the house's yard barks. We can ask the causal question in a straightforward way: **Did the ambulance driving by the house cause the dog to bark?**
 
 Alternatively, we can rephrase the question in terms of a counterfactual: Would the dog have barked if the ambulance had not driven by the house? We can visualize the relationship using a causal diagram also called a directed acyclic graph (DAG).
 
@@ -67,15 +70,49 @@ This is the simplest form of a causal diagram. If we were to statistically model
 
 **Question**: Can you think of any situations that may bias the observed relationship between the ambulance and the dog barking?
 
+## Making DAGs
+
+There are several options for making DAGs. We could draw them by hand on a piece of paper or in software that allows us to make diagrams. But there are specialized options available online and in R we can use instead.
+
+### Dagitty
+
+Dagitty offers both an online version (<http://www.dagitty.net/>) and an R package. The online version provides a user interface. You can also export the diagram from the online interface to R.
+
+**Demo:** Dagitty online and export to R
+
+```{r, fig.height=1, fig.width=3}
+dag_export <- dagitty( 'dag {
+bb="0,0,1,1"
+age [pos="0.258,0.073"]
+genetics [pos="0.416,0.539"]
+lung_cancer [outcome,pos="0.607,0.288"]
+pollution [pos="0.261,0.178"]
+smoking [exposure,pos="0.265,0.291"]
+age -> lung_cancer
+genetics -> lung_cancer
+genetics -> smoking
+pollution -> lung_cancer
+smoking -> lung_cancer
+}')
+
+plot(dag_export, height=1)
+```
+
+### ggDag
+
+```{r, fig.height=3, fig.width=6}
+ggdag(dag_export, node_size = 18, text_col="red")+theme_dag_blank()
+```
+
 ## Bias and Confounding
 
 ### Confounding
 
 Confounding arises when a third variable is present in the relationship between cause-and-effect. A confounder is present when:
 
-1. The confounder causes the outcome
-2. The confounder causes the exposure
-3. The confounder is not a mediator (i.e. it is not present on the causal pathway between the exposure and the outcome)
+1.  The confounder causes the outcome
+2.  The confounder causes the exposure
+3.  The confounder is not a mediator (i.e. it is not present on the causal pathway between the exposure and the outcome)
 
 Returning to our example, the relationship between the ambulance and the barking dog could be confounded by a third variable: a nearby car crash. Perhaps this car crash is what started the dog barking before the ambulance even arrived, but the ambulance caused the dog to bark even more.
 
@@ -89,17 +126,20 @@ coordinates(cd2) <- list(x=c(Ambulance=1, Dog_Barking=3, Car_Crash=2),
                          y=c(Ambulance=0, Dog_Barking=0, Car_Crash=1))
 plot(cd2)
 ```
+
 The pathway between the exposure and the outcome through the confounder is called a "backdoor pathway" and it can bias the relationship between the exposure and the outcome you observe. In this situation, we might observe barking and conclude that it occurred due to the ambulance when in fact it was due to the car crash. Or we might conclude that the volume of the barking caused by the ambulance alone is much greater than it actually is due to the combined effect of both the car crash and the ambulance.
 
-We can "deconfound" the effect of interest by controlling for the confounder. The old-fashioned way of doing this is to manually stratify your data by levels of the confounder. Then you calculate an effect size for each stratum. In a modern regression model, we can include the confounder as an independent variable in our model and it is controlled for. When we include the confounder as a variable in a regression model, we are effectively stratifying the effect across different levels of the confounder then taking the weighted average across strata to get an effect size.
+We can "deconfound" the effect of interest by controlling for the confounder. The old-fashioned way of doing this is to manually stratify your data by levels of the confounder. Then you calculate an effect size for each stratum. In a regression model, we can include the confounder as an independent variable in our model and it is controlled for. When we include the confounder as a variable in a regression model, we are effectively stratifying the effect across different levels of the confounder then taking the weighted average across strata to get an effect size.
+
+**Exercise 1:** In R, dagitty, or by hand, create a DAG for a causal relationship of interest to you. Be sure to include at least one confounder.
 
 ### Colliders
 
 Taken at face value, colliders are similar to confounders. However, colliders are not common causes of the exposure and outcome. Instead:
 
-1. The outcome causes the collider
-2. The exposure causes the collider
-3. The collider is not a mediator
+1.  The outcome causes the collider
+2.  The exposure causes the collider
+3.  The collider is not a mediator
 
 ```{r, echo = FALSE, fig.height=1.5, fig.width=3}
 cd3 <- dagitty( "dag {
@@ -118,13 +158,11 @@ plot(cd2)
 plot(cd3)
 ```
 
-
 Adjusting for a collider as one would for a confounder can create bias. In effect by adjusting for a collider, a backdoor pathway is opened between the exposure and the outcome through the collider. So what's the proper way of dealing with colliders? Ignoring them! Hypothesized colliders should not be adjusted for or included in models.
 
 #### Side note on pathways
-In a DAG, a pathway is considered blocked:
-- If there are two arrows pointing into each other along the path (as in the case of a collider)
-- If you have deconfounded (controlled, stratified, adjusted) for a variable on the pathway
+
+In a DAG, a pathway is considered blocked: - If there are two arrows pointing into each other along the path (as in the case of a collider) - If you have deconfounded (controlled, stratified, adjusted) for a variable on the pathway
 
 ```{r, echo = FALSE, fig.height=1.5, fig.width=6}
 par(mfrow=c(1,2))
@@ -146,6 +184,7 @@ plot(sn2)
 ```
 
 ### Selection bias
+
 Another major issue of causal inference is selection bias. This arises when selection is dependent on the exposure and the outcome in the study:
 
 ```{r, echo = FALSE, fig.height=1.5, fig.width=3}
@@ -166,16 +205,17 @@ A common source of selection bias is loss to follow-up in many studies. In survi
 ## Study Designs
 
 ### Randomized Control Trials (RCTs)
-* Exposure of interest is assigned at random
-* Because exposure is assigned at random, there are no possible confounders of the relationship between exposure and outcome
-* Considered the gold standard for causal inference
-* Selection bias is still possible
+
+-   Exposure of interest is assigned at random
+-   Because exposure is assigned at random, there are no possible confounders of the relationship between exposure and outcome
+-   Considered the gold standard for causal inference
+-   Selection bias is still possible
 
 **Question:** How can selection bias occur in an RCT?
 
 #### Instrumental Variable Analysis/Mendelian Randomization
 
-- Attempts to mimic an RCT using a source of pseudorandomization
+-   Attempts to mimic an RCT using a source of pseudorandomization
 
 Consider the DAG for an RCT:
 
@@ -191,6 +231,7 @@ plot(rct)
 ```
 
 In IV/MR analysis the coin flip is replaced with a source of randomization such as genetic variation:
+
 ```{r, echo = FALSE, fig.height=1.5, fig.width=5}
 mr <- dagitty( "dag {
   Exposure -> Outcome
@@ -202,37 +243,36 @@ coordinates(mr) <- list(x=c(Genetic_Variation=1, Exposure=2, Outcome=3, C=2.5),
 plot(mr)
 ```
 
-Researchers have used a variety of factors as sources of pseudorandomness in IV studies:
-- Before and after implementation of a new government policy
-- Distance from a medical center
-- 
+Researchers have used a variety of factors as sources of pseudorandomness in IV studies: - Before and after implementation of a new government policy - Distance from a medical center -
 
 ### Cohort Studies
 
-- Participants are chosen on a common characteristic (such as occupation, location, or history of a particular disease)
-- They are then followed over time and exposures and outcomes can be assessed
-- Selection bias and confounding can occur
+-   Participants are chosen on a common characteristic (such as occupation, location, or history of a particular disease)
+-   They are then followed over time and exposures and outcomes can be assessed
+-   Selection bias and confounding can occur
 
 ### Case-Control Studies
 
-- Participants are chosen based on having an outcome of interest (cases)
-- Then controls are selected from a similar population to the cases (often matched on age, sex, and other demographic variables)
-- Selection bias and confounding can occur
+-   Participants are chosen based on having an outcome of interest (cases)
+-   Then controls are selected from a similar population to the cases (often matched on age, sex, and other demographic variables)
+-   Selection bias and confounding can occur
 
 ### Genome-Wide Association Study (GWAS)
 
-- Observational study of phenotypes
+-   Observational study of phenotypes
 
-- Often participants are chosen based on a specific phenotype or disease
+-   Often participants are chosen based on a specific phenotype or disease
 
-- Can be a case-control or a cohort study
+-   Can be a case-control or a cohort study
 
 **Question**: What are some possible sources of confounding or bias in a GWAS?
 
 ## Causal Inference in R
+
 R provides many packages that are helpful in causal inference.
 
 ### Dagitty
+
 Dagitty allows for creating causal diagrams, but also gives you more information including what variables to adjust for in complicated causal models.
 
 ```{r, fig.height=3, fig.width=6}
@@ -259,6 +299,7 @@ for( n in names(g1) ){
 ```
 
 ### ggdag
+
 Another option for making causal diagrams is ggdag which can accept daggity objects and plots DAGs using ggplot2.
 
 ```{r}
@@ -266,14 +307,18 @@ ggdag_adjustment_set(g1, "X", "Y")
 ```
 
 ### DESeq2
+
 DESeq2 uses negative binomial regression. As such, it allows you to deconfound by including the confounder as a variable in the design statement:
+
 ```{r, eval = FALSE}
 ddsSE <- DESeqDataSet(se, design = ~ exposure + confounder1 + confounder2)
 ddsSE
 ```
 
 ### edgeR and limma
+
 You can use `model.matrix()` to specify the exposure and confounders:
+
 ```{r, eval = FALSE}
 batch <- factor(ds$Batch)
 treat <- factor(ds$tx)
@@ -282,11 +327,13 @@ design <- model.matrix(~treat + batch)
 ```
 
 Then fit the model either in edgeR:
+
 ```{r, eval = FALSE}
 fit <- glmQLFit(y, design)
 ```
 
 Or in limma:
+
 ```{r, eval = FALSE}
 fit <- lmFit(y, design)
 ```
@@ -294,6 +341,7 @@ fit <- lmFit(y, design)
 As mentioned in the confounding section, estimates obtained for the relationship between the exposure and the outcome have been adjusted for the included confounders (deconfounded). This means that the observed estimate is an averaged effect size across strata of the confounder(s).
 
 ## Example in curatedMetagenomicData
+
 Step 1: Draw our assumptions. For this example, we use the VogtmannE 2016 dataset in cMD. The dataset has 52 cases of colorectal cancer and 52 controls. First, let's create a causal diagram for this relationship.
 
 ```{r}
@@ -306,12 +354,13 @@ ggdag(v_dag, text_col="red")+theme_dag()+theme_dag_gray()
 ```
 
 What do we need to adjust for?
+
 ```{r}
 ggdag_adjustment_set(v_dag, exposure = "crc", outcome = "microbiome")+theme_dag_gray()
 ```
 
-
 Download the data, extract the expressionset, and only take responses for which we have a value for study condition.
+
 ```{r, warning=FALSE, message=FALSE, results='hide'}
 vogtmann <- curatedMetagenomicData("VogtmannE_2016.metaphlan_bugs_list.stool", dryrun = FALSE)
 vm.eset <-vogtmann[[1]]
@@ -323,8 +372,8 @@ vm.sub <- vm.eset[,!is.na(vm.eset$study_condition)]
 table(vm.sub$study_condition, useNA="ifany")
 ```
 
-
 First we conduct a basic analysis to examine whether there are any statistically significant differences in taxa of microbiota by study condition. We use a forgiving alpha of 0.10 for adjusted p-values. We find 5 significant taxa in this crude analysis.
+
 ```{r, warning=FALSE, message=FALSE, results='hide'}
 vm.pseq <- ExpressionSet2phyloseq(vm.sub)
 dx_only <- phyloseq_to_deseq2(vm.pseq, ~ study_condition)
@@ -339,8 +388,8 @@ sigtab <- cbind(as(sigtab, "data.frame"), as(tax_table(vm.pseq)[rownames(sigtab)
 sigtab
 ```
 
-
 Next we adjust (deconfound) for categorized age. We find two significant results:
+
 ```{r, warning=FALSE, message=FALSE, results='hide'}
 dx_age <- phyloseq_to_deseq2(vm.pseq, ~ study_condition + age_category)
 dx_age <- DESeq(dx_age, test="Wald", fitType="parametric")
@@ -355,6 +404,7 @@ sigtab
 ```
 
 Finally we add in gender. Again observing two significant results.
+
 ```{r, warning=FALSE, message=FALSE, results='hide'}
 dx_age_gender <- phyloseq_to_deseq2(vm.pseq, ~ study_condition + age_category + gender)
 dx_age_gender <- DESeq(dx_age_gender, test="Wald", fitType="parametric")
@@ -368,12 +418,11 @@ sigtab = cbind(as(sigtab, "data.frame"), as(tax_table(vm.pseq)[rownames(sigtab),
 sigtab
 ```
 
-
 As mentioned in the confounding section, estimates obtained for the relationship between the exposure and the outcome have been adjusted for the included confounders (deconfounded). This means that the observed estimate is an averaged effect size across strata of the confounder(s).
 
 ## Toy Problems
 
-1. Consider the DAG below. What variables should you control for if you want to measure the effect of X on Y?
+1.  Consider the DAG below. What variables should you control for if you want to measure the effect of X on Y?
 
 ```{r, echo = FALSE}
 ex1 <- dagitty( "dag {
@@ -388,10 +437,11 @@ ex1 <- dagitty( "dag {
 plot(graphLayout(ex1))
 ```
 
-2. Create your own DAG (of a causal relationship of interest to you) then identify what variables you would need to control for to measure the causal effect of interest.
-3. One important subject that I did not touch on in this workshop was generalizability or transportability of causal findings (applying the results to an external population). What issues might arise when doing so? How can a DAG be used to resolve issues of generalizability and transportability?
+2.  Create your own DAG (of a causal relationship of interest to you) then identify what variables you would need to control for to measure the causal effect of interest.
+3.  One important subject that I did not touch on in this workshop was generalizability or transportability of causal findings (applying the results to an external population). What issues might arise when doing so? How can a DAG be used to resolve issues of generalizability and transportability?
 
 ## Conclusions
+
 Unfortunately there's no silver bullet for confounding or bias in R or Bioconductor. Instead, we as researchers must carefully consider possible sources of bias--ideally as we begin designing the study. DAGs are helpful in providing a clear visualization of the hypothesized causal mechanism and identifying potential confounders. As Hernan says, "Draw your assumptions before you draw your conclusions."
 
 Unmeasured confounding presents a particularly difficult problem for causal inference. Because the confounder was not measured, we cannot easily deconfound for it.
@@ -402,7 +452,7 @@ It is important for us to remember that the definition of a cause is rooted in t
 
 This has been a basic primer on causal inference but if you'd like to learn more:
 
-- Pearl and Mackenzie *Book of Why: The New Science of Causal Effect* (easy summer beach read!)
-- Hernan and Robins *Causal Inference* available free online: https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/
-- Pearl *Causality: Models, Reasoning, and Inference*
-- Hernan's edX course available free online: https://www.edx.org/course/causal-diagrams-draw-your-assumptions-before-your
+-   Pearl and Mackenzie *Book of Why: The New Science of Causal Effect* (easy summer beach read!)
+-   Hernan and Robins *Causal Inference* available free online: <https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/>
+-   Pearl *Causality: Models, Reasoning, and Inference*
+-   Hernan's edX course available free online: <https://www.edx.org/course/causal-diagrams-draw-your-assumptions-before-your>
