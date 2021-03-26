@@ -39,7 +39,7 @@ Despite this, humans (and animals) tend to have a relatively intuitive understan
 
 **Question:** My cat has learned that jumping on my kitchen table while I'm eating results in him getting a spritz of water with a spray bottle--but only if the spray bottle is within reach. **What potential causal variables could my cat be considering when he decides to jump on the table?**
 
-**Question:** Now that we have discussed what a cause is in the context of daily life. What are some causes we may be interested in within the context of Bioinformatics (or your field of work/study)?
+**Question:** Now that we have discussed what a cause is in the context of daily life. What are some causes we may be interested in within the context of Bioinformatics (or your field of work/study/research)?
 
 ## The counterfactual definition of a cause
 
@@ -182,6 +182,8 @@ coordinates(sn2) <- list(x=c(E=0, C1=1, C2=2, O=3),
                          y=c(E=0, C1=1, C2=1, O=0))
 plot(sn2)
 ```
+
+**Exercise 2:** Using the DAG you made in Exercise 1, add a collider.
 
 ### Selection bias
 
@@ -340,9 +342,19 @@ fit <- lmFit(y, design)
 
 As mentioned in the confounding section, estimates obtained for the relationship between the exposure and the outcome have been adjusted for the included confounders (deconfounded). This means that the observed estimate is an averaged effect size across strata of the confounder(s).
 
-## Example in curatedMetagenomicData
+## Exercise in R using curatedMetagenomicData and DESeq2
 
-Step 1: Draw our assumptions. For this example, we use the VogtmannE 2016 dataset in cMD. The dataset has 52 cases of colorectal cancer and 52 controls. First, let's create a causal diagram for this relationship.
+Install curatedMetagenomicData
+
+```{r, eval = FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("curatedMetagenomicData")
+library(curatedMetagenomicData)
+```
+
+Draw our assumptions. For this example, we use the VogtmannE 2016 dataset in cMD. The dataset has 52 cases of colorectal cancer (crc) and 52 controls. First, let's create a causal diagram for this relationship.
 
 ```{r}
 v_dag <- dagitty( "dag {
@@ -356,7 +368,7 @@ ggdag(v_dag, text_col="red")+theme_dag()+theme_dag_gray()
 What do we need to adjust for?
 
 ```{r}
-ggdag_adjustment_set(v_dag, exposure = "crc", outcome = "microbiome")+theme_dag_gray()
+ggdag_adjustment_set(v_dag, exposure = "crc", outcome = "microbiome", text_col="purple")+theme_dag_gray()
 ```
 
 Download the data, extract the expressionset, and only take responses for which we have a value for study condition.
