@@ -19,7 +19,7 @@ Chloe Mirzayi, [cmirzayi\@gmail.com](mailto:cmirzayi@gmail.com){.email}
 
 Levi Waldron, [levi.waldron\@sph.cuny.edu](mailto:levi.waldron@sph.cuny.edu){.email}
 
-CUNY School of Public Health, 55 W 125th St, New York, NY 111027
+CUNY School of Public Health, 55 W 125th St, New York, NY 10027 USA
 
 ```{r, message = FALSE}
 library(curatedMetagenomicData)
@@ -29,6 +29,27 @@ library(phyloseq)
 library(ggdag)
 ```
 
+## Smoking and lung cancer: the most famous causal inference problem
+
+Though the idea that smoking causes lung cancer is a well-accepted fact these days, it was an incredibly controversial theory in the 1950s and 60s. The statistician RA Fisher (who developed ANOVA, the F-distribution, and more) believed that smoking *did not* cause lung cancer, arguing that correlation does not necessarily mean causation.
+
+Questions to consider during this workshop:
+
+1.  If you wanted to prove Fisher wrong and demonstrate smoking causes lung cancer, how would you do so?
+2.  One of Fisher's main arguments was that there was a genetic factor that was correlated with both smoking behaviors and lung cancer. He argued that this genetic factor was what was truly causing lung cancer in smokers. How would you test this theory?
+
+## Goals and Outline
+
+-   Introduce fundamental concepts of causal inference
+
+-   Discuss how to make directed acyclic graphs (DAGs) and how to use them when analyzing data
+
+-   Explore concepts of bias and confounding
+
+-   Review common study designs and their implications for causal inference
+
+-   Briefly survey tools in R that can help with causal inference
+
 ## Introduction: Just what is a cause anyway?
 
 **Question:** In your own words, what is a cause? What does it mean to cause something?
@@ -37,9 +58,7 @@ How do we know our potential cause brought about an effect or a result? Perhaps 
 
 Despite this, humans (and animals) tend to have a relatively intuitive understanding of causation when we observe it directly. When I burn my finger while cooking, I know what caused it--my finger coming into contact with a hot stove. I could also trace the causal pathway backward and identify what caused my finger to come into contact with the hot stove in the first place--such as my motivation to cook dinner or me being distracted by the antics of my cat.
 
-**Question:** My cat has learned that jumping on my kitchen table while I'm eating results in him getting a spritz of water with a spray bottle--but only if the spray bottle is within reach. **What potential causal variables could my cat be considering when he decides to jump on the table?**
-
-**Question:** Now that we have discussed what a cause is in the context of daily life. What are some causes we may be interested in within the context of Bioinformatics (or your field of work/study/research)?
+**Question:** What are some causes we may be interested in within the context of Bioinformatics (or your field of work/study/research)?
 
 ## The counterfactual definition of a cause
 
@@ -344,6 +363,16 @@ As mentioned in the confounding section, estimates obtained for the relationship
 
 ## Exercise in R using curatedMetagenomicData and DESeq2
 
+We will be using the VogtmannE 2016 dataset in curatedMetagenomicData. The dataset has 52 cases of colorectal cancer (crc) and 52 controls. First, let's create a causal diagram for this relationship.
+
+1.  We are interested on whether our exposure (colorectal cancer) changes the outcome (gut microbiome). Create a DAG for this relationship. Consider possible confounders, selection bias, etc. Using the DAG, determine what to adjust for.
+
+2.  In R, download the data and look at study condition. Remove any missing values.
+
+3.  Run a bivariate model of the exposure and the outcome without any deconfounding. What bacterial taxa are significant?
+
+4.  Deconfound for confounders you identified in your DAG. If you can't deconfound for them because they were not measured, how does that affect your results?
+
 Install curatedMetagenomicData
 
 ```{r, eval = FALSE}
@@ -464,7 +493,7 @@ It is important for us to remember that the definition of a cause is rooted in t
 
 This has been a basic primer on causal inference but if you'd like to learn more:
 
--   Pearl and Mackenzie *Book of Why: The New Science of Causal Effect* (easy summer beach read!)
+-   Pearl and Mackenzie *Book of Why: The New Science of Causal Effect* (easy read!)
 -   Hernan and Robins *Causal Inference* available free online: <https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/>
 -   Pearl *Causality: Models, Reasoning, and Inference*
 -   Hernan's edX course available free online: <https://www.edx.org/course/causal-diagrams-draw-your-assumptions-before-your>
