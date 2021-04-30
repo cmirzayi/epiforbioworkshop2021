@@ -28,14 +28,19 @@ Suggests:
     rmarkdown
 Imports:
     dagitty,
+    ggdag,
+    Rcpp,
     DESeq2,
     edgeR,
-    limma,
     curatedMetagenomicData,
     phyloseq,
-    ggdag,
-    Biobase,
-    Rcpp
+    Biobase
+Remotes:
+    bioc::release/DESeq2,
+    bioc::release/edgeR,
+    bioc::release/curatedMetagenomicData,
+    bioc::release/phyloseq,
+    bioc::release/Biobase
 URL: https://chloemirzayi.com/EpiForBioWorkshop2021, https://cmirzayi.github.io/EpiForBioWorkshop2021/
 BugReports: https://github.com/cmirzayi/EpiForBioWorkshop2021/issues/new
 VignetteBuilder: knitr
