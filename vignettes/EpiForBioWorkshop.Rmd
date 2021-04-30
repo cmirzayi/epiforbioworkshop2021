@@ -168,6 +168,12 @@ In a regression model, we can include the confounder as an independent variable 
 
 **Exercise 2:** Using your DAG for a causal relationship of interest to you, consider potential confounders.
 
+#### Unmeasured confounding
+
+A common issue in observational studies is that there may be confounders that you are not aware of or did not assess. Unmeasured confounding is a problem with no easy solution as it is effectively a missing data problem--we cannot deconfound for a confounder we have not measured.
+
+While not a full solution, one possible method for considering unmeasured confounding is to conduct sensitivity analysis to see how large in magnitude the unmeasured confounder would need to be to substantially affect the observed effect size. If the effect size is sensitive to this hypothetical confounder, we should be more careful in how we interpret our results.
+
 ### Colliders
 
 Taken at face value, colliders are similar to confounders. However, colliders are not common causes of the exposure and outcome. Instead:
@@ -218,9 +224,11 @@ coordinates(sn2) <- list(x=c(E=0, C1=1, C2=2, O=3),
 plot(sn2)
 ```
 
-**Exercise 3:** Using the DAG you made in Exercise 1, add a collider.
+**Exercise 3:** Using the DAG you made in Exercises 1 and 2, add a collider.
 
 ### Selection bias
+
+![](images/Survivorship-bias.svg.png){width="309"}
 
 Another major issue of causal inference is selection bias. This arises when selection is dependent on the exposure and the outcome in the study:
 
@@ -238,6 +246,8 @@ plot(cd4)
 As can be seen from the DAG above, selection bias is a collider. In this case, the study is conditioned on the collider by the act of selection for the study. As a result, the study is biased. One particularly memorable way to think of selection bias is as the "already dead" problem. People who have already died of the outcome are not alive to be in the study. These people may have a more aggressive or serious form of the outcome and not including them masks some of the causal relationship.
 
 A common source of selection bias is loss to follow-up in many studies. In survival analysis in particular this can be important as the people who are lost may differ in important ways from those who completed the study. Unfortunately because these people were lost, it is often difficult to assess how they differed from those who were not lost.
+
+**Question:** Is the collider you added in Exercise 3 a possible source of selection bias? If so, how?
 
 ## Study Designs
 
@@ -280,7 +290,15 @@ coordinates(mr) <- list(x=c(Genetic_Variation=1, Exposure=2, Outcome=3, C=2.5),
 plot(mr)
 ```
 
-Researchers have used a variety of factors as sources of pseudorandomness in IV studies: - Before and after implementation of a new government policy - Distance from a medical center -
+Researchers have used a variety of factors as sources of pseudorandomness in IV studies:
+
+-   Before and after implementation of a new government policy
+
+-   Distance from a medical center
+
+-   Genetic variants
+
+**Question:** IV/MR studies can seem quite powerful because they allow us to make stronger causal arguments without doing an RCT. What might be some issues with doing IV/MR studies?
 
 ### Cohort Studies
 
@@ -343,7 +361,9 @@ Another option for making causal diagrams is ggdag which can accept daggity obje
 ggdag_adjustment_set(g1, "X", "Y")
 ```
 
-### DESeq2
+### Adjusting for confounders
+
+#### DESeq2
 
 DESeq2 uses negative binomial regression. As such, it allows you to deconfound by including the confounder as a variable in the design statement:
 
@@ -352,7 +372,7 @@ ddsSE <- DESeqDataSet(se, design = ~ exposure + confounder1 + confounder2)
 ddsSE
 ```
 
-### edgeR and limma
+#### edgeR and limma
 
 You can use `model.matrix()` to specify the exposure and confounders:
 
@@ -477,25 +497,12 @@ sigtab
 
 As mentioned in the confounding section, estimates obtained for the relationship between the exposure and the outcome have been adjusted for the included confounders (deconfounded). This means that the observed estimate is an averaged effect size across strata of the confounder(s).
 
-## Toy Problems
+**Question:** After adjusting for confounding by age and gender, we found that colorectal cancer is associated with increased abundance of two taxa, but we would probably still hesitate to argue that we've shown that colorectal cancer causes these changes in abundance. What sources of bias might still potentially affect our model? How could we design a better study to account for these biases?
 
-1.  Consider the DAG below. What variables should you control for if you want to measure the effect of X on Y?
+## Discussion Questions
 
-```{r, echo = FALSE}
-ex1 <- dagitty( "dag {
-    W1 -> Z1 <- X -> Y
-    Z1 <- V -> Z2
-    W2 <- Z2 -> Y
-    X -> W1 -> W2 -> Y
-    X <- A -> W1 -> Y
-    B -> W1
-    Z2 <- C -> W2
-}")
-plot(graphLayout(ex1))
-```
-
-2.  Create your own DAG (of a causal relationship of interest to you) then identify what variables you would need to control for to measure the causal effect of interest.
-3.  One important subject that I did not touch on in this workshop was generalizability or transportability of causal findings (applying the results to an external population). What issues might arise when doing so? How can a DAG be used to resolve issues of generalizability and transportability?
+1.  Often in our work, we are presented with data that have already been collected and we are asked to analyze it. Other times we have the privilege of designing a study from scratch. And some times we are brought in when the analyses are nearly done for a paper and just asked for our feedback. When during the study process should we create a DAG? Is it too late to make a DAG if the analyses are nearly completed?
+2.  One important subject that I did not touch on in this workshop was generalizability or transportability of causal findings (applying the results to an external population). What issues might arise when doing so? How can a DAG be used to resolve issues of generalizability and transportability?
 
 ## Conclusions
 
@@ -509,7 +516,7 @@ It is important for us to remember that the definition of a cause is rooted in t
 
 This has been a basic primer on causal inference but if you'd like to learn more:
 
--   Pearl and Mackenzie *Book of Why: The New Science of Causal Effect* (easy read!)
+-   Pearl and Mackenzie *Book of Why: The New Science of Causal Effect* (easy, fun read!)
 -   Hernan and Robins *Causal Inference* available free online: <https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/>
 -   Pearl *Causality: Models, Reasoning, and Inference*
 -   Hernan's edX course available free online: <https://www.edx.org/course/causal-diagrams-draw-your-assumptions-before-your>
