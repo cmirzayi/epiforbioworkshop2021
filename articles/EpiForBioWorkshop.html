@@ -223,6 +223,12 @@ smoking -&gt; lung_cancer
 <p>We can “deconfound” the effect of interest by controlling for the confounder. The old-fashioned way of doing this is to manually stratify your data by levels of the confounder. Then you calculate an effect size for each stratum then calculate a weighted average across strata. You may have been exposed to this statistical method in a biostatistics course as a Cochran-Mantel-Haenszel statistic.</p>
 <p>In a regression model, we can include the confounder as an independent variable in our model and it is controlled for. When we include the confounder as a variable in a regression model, we are effectively stratifying the effect across different levels of the confounder then taking the weighted average across strata to get an effect size.</p>
 <p><strong>Exercise 2:</strong> Using your DAG for a causal relationship of interest to you, consider potential confounders.</p>
+<div id="unmeasured-confounding" class="section level4">
+<h4 class="hasAnchor">
+<a href="#unmeasured-confounding" class="anchor"></a>Unmeasured confounding</h4>
+<p>A common issue in observational studies is that there may be confounders that you are not aware of or did not assess. Unmeasured confounding is a problem with no easy solution as it is effectively a missing data problem–we cannot deconfound for a confounder we have not measured.</p>
+<p>While not a full solution, one possible method for considering unmeasured confounding is to conduct sensitivity analysis to see how large in magnitude the unmeasured confounder would need to be to substantially affect the observed effect size. If the effect size is sensitive to this hypothetical confounder, we should be more careful in how we interpret our results.</p>
+</div>
 </div>
 <div id="colliders" class="section level3">
 <h3 class="hasAnchor">
@@ -241,16 +247,18 @@ smoking -&gt; lung_cancer
 <a href="#side-note-on-pathways" class="anchor"></a>Side note on pathways</h4>
 <p>In a DAG, a pathway is considered blocked: - If there are two arrows pointing into each other along the path (as in the case of a collider) - If you have deconfounded (controlled, stratified, adjusted) for a variable on the pathway</p>
 <p><img src="EpiForBioWorkshop_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
-<p><strong>Exercise 3:</strong> Using the DAG you made in Exercise 1, add a collider.</p>
+<p><strong>Exercise 3:</strong> Using the DAG you made in Exercises 1 and 2, add a collider.</p>
 </div>
 </div>
 <div id="selection-bias" class="section level3">
 <h3 class="hasAnchor">
 <a href="#selection-bias" class="anchor"></a>Selection bias</h3>
+<p><img src="images/Survivorship-bias.svg.png" width="309"></p>
 <p>Another major issue of causal inference is selection bias. This arises when selection is dependent on the exposure and the outcome in the study:</p>
 <p><img src="EpiForBioWorkshop_files/figure-html/unnamed-chunk-9-1.png" width="288"></p>
 <p>As can be seen from the DAG above, selection bias is a collider. In this case, the study is conditioned on the collider by the act of selection for the study. As a result, the study is biased. One particularly memorable way to think of selection bias is as the “already dead” problem. People who have already died of the outcome are not alive to be in the study. These people may have a more aggressive or serious form of the outcome and not including them masks some of the causal relationship.</p>
 <p>A common source of selection bias is loss to follow-up in many studies. In survival analysis in particular this can be important as the people who are lost may differ in important ways from those who completed the study. Unfortunately because these people were lost, it is often difficult to assess how they differed from those who were not lost.</p>
+<p><strong>Question:</strong> Is the collider you added in Exercise 3 a possible source of selection bias? If so, how?</p>
 </div>
 </div>
 <div id="study-designs" class="section level2">
@@ -276,7 +284,13 @@ smoking -&gt; lung_cancer
 <p><img src="EpiForBioWorkshop_files/figure-html/unnamed-chunk-10-1.png" width="480"></p>
 <p>In IV/MR analysis the coin flip is replaced with a source of randomization such as genetic variation:</p>
 <p><img src="EpiForBioWorkshop_files/figure-html/unnamed-chunk-11-1.png" width="480"></p>
-<p>Researchers have used a variety of factors as sources of pseudorandomness in IV studies: - Before and after implementation of a new government policy - Distance from a medical center -</p>
+<p>Researchers have used a variety of factors as sources of pseudorandomness in IV studies:</p>
+<ul>
+<li><p>Before and after implementation of a new government policy</p></li>
+<li><p>Distance from a medical center</p></li>
+<li><p>Genetic variants</p></li>
+</ul>
+<p><strong>Question:</strong> IV/MR studies can seem quite powerful because they allow us to make stronger causal arguments without doing an RCT. What might be some issues with doing IV/MR studies?</p>
 </div>
 </div>
 <div id="cohort-studies" class="section level3">
@@ -382,17 +396,20 @@ smoking -&gt; lung_cancer
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/ggdag/man/adjustment_sets.html">ggdag_adjustment_set</a></span><span class="op">(</span><span class="va">g1</span>, <span class="st">"X"</span>, <span class="st">"Y"</span><span class="op">)</span></code></pre></div>
 <p><img src="EpiForBioWorkshop_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
 </div>
-<div id="deseq2" class="section level3">
+<div id="adjusting-for-confounders" class="section level3">
 <h3 class="hasAnchor">
-<a href="#deseq2" class="anchor"></a>DESeq2</h3>
+<a href="#adjusting-for-confounders" class="anchor"></a>Adjusting for confounders</h3>
+<div id="deseq2" class="section level4">
+<h4 class="hasAnchor">
+<a href="#deseq2" class="anchor"></a>DESeq2</h4>
 <p>DESeq2 uses negative binomial regression. As such, it allows you to deconfound by including the confounder as a variable in the design statement:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ddsSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DESeq2/man/DESeqDataSet.html">DESeqDataSet</a></span><span class="op">(</span><span class="va">se</span>, design <span class="op">=</span> <span class="op">~</span> <span class="va">exposure</span> <span class="op">+</span> <span class="va">confounder1</span> <span class="op">+</span> <span class="va">confounder2</span><span class="op">)</span>
 <span class="va">ddsSE</span></code></pre></div>
 </div>
-<div id="edger-and-limma" class="section level3">
-<h3 class="hasAnchor">
-<a href="#edger-and-limma" class="anchor"></a>edgeR and limma</h3>
+<div id="edger-and-limma" class="section level4">
+<h4 class="hasAnchor">
+<a href="#edger-and-limma" class="anchor"></a>edgeR and limma</h4>
 <p>You can use <code><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix()</a></code> to specify the exposure and confounders:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">batch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">ds</span><span class="op">$</span><span class="va">Batch</span><span class="op">)</span>
@@ -406,6 +423,7 @@ smoking -&gt; lung_cancer
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">lmFit</span><span class="op">(</span><span class="va">y</span>, <span class="va">design</span><span class="op">)</span></code></pre></div>
 <p>As mentioned in the confounding section, estimates obtained for the relationship between the exposure and the outcome have been adjusted for the included confounders (deconfounded). This means that the observed estimate is an averaged effect size across strata of the confounder(s).</p>
+</div>
 </div>
 </div>
 <div id="exercise-in-r-using-curatedmetagenomicdata-and-deseq2" class="section level2">
@@ -553,16 +571,13 @@ smoking -&gt; lung_cancer
 ## s__Ruminococcus_torques                                           &lt;NA&gt;
 ## t__Ruminococcus_torques_unclassified Ruminococcus_torques_unclassified</code></pre>
 <p>As mentioned in the confounding section, estimates obtained for the relationship between the exposure and the outcome have been adjusted for the included confounders (deconfounded). This means that the observed estimate is an averaged effect size across strata of the confounder(s).</p>
+<p><strong>Question:</strong> After adjusting for confounding by age and gender, we found that colorectal cancer is associated with increased abundance of two taxa, but we would probably still hesitate to argue that we’ve shown that colorectal cancer causes these changes in abundance. What sources of bias might still potentially affect our model? How could we design a better study to account for these biases?</p>
 </div>
-<div id="toy-problems" class="section level2">
+<div id="discussion-questions" class="section level2">
 <h2 class="hasAnchor">
-<a href="#toy-problems" class="anchor"></a>Toy Problems</h2>
+<a href="#discussion-questions" class="anchor"></a>Discussion Questions</h2>
 <ol style="list-style-type: decimal">
-<li>Consider the DAG below. What variables should you control for if you want to measure the effect of X on Y?</li>
-</ol>
-<p><img src="EpiForBioWorkshop_files/figure-html/unnamed-chunk-30-1.png" width="700"></p>
-<ol start="2" style="list-style-type: decimal">
-<li>Create your own DAG (of a causal relationship of interest to you) then identify what variables you would need to control for to measure the causal effect of interest.</li>
+<li>Often in our work, we are presented with data that have already been collected and we are asked to analyze it. Other times we have the privilege of designing a study from scratch. And some times we are brought in when the analyses are nearly done for a paper and just asked for our feedback. When during the study process should we create a DAG? Is it too late to make a DAG if the analyses are nearly completed?</li>
 <li>One important subject that I did not touch on in this workshop was generalizability or transportability of causal findings (applying the results to an external population). What issues might arise when doing so? How can a DAG be used to resolve issues of generalizability and transportability?</li>
 </ol>
 </div>
@@ -578,7 +593,7 @@ smoking -&gt; lung_cancer
 <a href="#further-readingmaterials" class="anchor"></a>Further Reading/Materials</h2>
 <p>This has been a basic primer on causal inference but if you’d like to learn more:</p>
 <ul>
-<li>Pearl and Mackenzie <em>Book of Why: The New Science of Causal Effect</em> (easy read!)</li>
+<li>Pearl and Mackenzie <em>Book of Why: The New Science of Causal Effect</em> (easy, fun read!)</li>
 <li>Hernan and Robins <em>Causal Inference</em> available free online: <a href="https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/" class="uri">https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/</a>
 </li>
 <li>Pearl <em>Causality: Models, Reasoning, and Inference</em>
