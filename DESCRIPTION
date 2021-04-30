@@ -1,4 +1,4 @@
-Package: EpiForBioWorkshop2020
+Package: EpiForBioWorkshop2021
 Title: Epidemiology for Bioinformaticians Workshop
 Version: 0.1.5
 Authors@R: 
@@ -33,8 +33,10 @@ Imports:
     limma,
     curatedMetagenomicData,
     phyloseq,
-    ggdag
-URL: https://cmirzayi.github.io/EpiForBioWorkshop2020/
-BugReports: https://github.com/cmirzayi/EpiForBioWorkshop2020/issues/new
+    ggdag,
+    Biobase,
+    Rcpp
+URL: https://chloemirzayi.com/EpiForBioWorkshop2021, https://cmirzayi.github.io/EpiForBioWorkshop2021/
+BugReports: https://github.com/cmirzayi/EpiForBioWorkshop2021/issues/new
 VignetteBuilder: knitr
-DockerImage: cmirzayi/epiforbioworkshop2020:latest
+DockerImage: cmirzayi/epiforbioworkshop2021:latest
