@@ -1,9 +1,11 @@
 pandoc: 2.7.3
-pkgdown: 1.5.1
+pkgdown: 1.6.1
 pkgdown_sha: ~
-articles: []
-last_built: 2020-07-30T16:57Z
+articles:
+  EpiForBioWorkshop: EpiForBioWorkshop.html
+  questionResponses: questionResponses.html
+last_built: 2021-04-30T03:10Z
 urls:
-  reference: https://cmirzayi.github.io/EpiForBioWorkshop2020//reference
-  article: https://cmirzayi.github.io/EpiForBioWorkshop2020//articles
+  reference: https://chloemirzayi.com/EpiForBioWorkshop2021/reference
+  article: https://chloemirzayi.com/EpiForBioWorkshop2021/articles
 
