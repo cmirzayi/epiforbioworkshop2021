@@ -5,6 +5,10 @@ date: "7/30/2020"
 output: 
   rmarkdown::html_document:
     toc: true
+vignette: >
+  %\VignetteIndexEntry{QuestionsAnswered}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding[utf8]{inputenc}
 ---
 
 **Additional questions:** cmirzayi@gmail.com or post an issue on Github: https://github.com/cmirzayi/EpiForBioWorkshop2020
