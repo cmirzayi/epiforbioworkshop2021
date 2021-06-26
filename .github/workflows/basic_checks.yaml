@@ -2,7 +2,7 @@ on: [push, pull_request]
 
 env:
   cache-version: v1
-  repo-name: cmirzayi/EpiForBioWorkshop2021/
+  repo-name: cmirzayi/epiforbioworkshop2021/
 
 jobs:
   job1:
