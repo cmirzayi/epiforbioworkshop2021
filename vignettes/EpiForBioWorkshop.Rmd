@@ -32,7 +32,7 @@ library(mia)
 
 ## Smoking and lung cancer: the most famous causal inference problem
 
-Though the idea that smoking causes lung cancer is a well-accepted fact these days, it was an incredibly controversial theory in the 1950s and 60s. The statistician RA Fisher (who developed ANOVA, the F-distribution, and more) believed that smoking *did not* cause lung cancer, arguing that correlation does not necessarily mean causation.
+Though the idea that smoking causes lung cancer is a well-accepted fact these days, it was an incredibly controversial theory in the 1950s and 60s. The statistician RA Fisher (who developed ANOVA, the F-distribution, and more) believed that smoking ***did not***cause lung cancer, arguing that correlation does not necessarily mean causation.
 
 Questions to consider during this workshop:
 
