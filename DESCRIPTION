@@ -34,7 +34,8 @@ Imports:
     edgeR,
     curatedMetagenomicData,
     phyloseq,
-    Biobase
+    Biobase,
+    mia
 Remotes:
     bioc::release/DESeq2,
     bioc::release/edgeR,
