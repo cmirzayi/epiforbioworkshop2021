@@ -27,6 +27,7 @@ library(dagitty)
 library(DESeq2)
 library(phyloseq)
 library(ggdag)
+library(mia)
 ```
 
 ## Smoking and lung cancer: the most famous causal inference problem
@@ -439,60 +440,62 @@ ggdag_adjustment_set(v_dag, exposure = "crc", outcome = "microbiome", text_col="
 Download the data, extract the expressionset, and only take responses for which we have a value for study condition.
 
 ```{r, warning=FALSE, message=FALSE, results='hide'}
-vogtmann <- curatedMetagenomicData("VogtmannE_2016.metaphlan_bugs_list.stool", dryrun = FALSE)
-vm.eset <-vogtmann[[1]]
-table(vm.eset$study_condition, useNA="ifany")
-vm.sub <- vm.eset[,!is.na(vm.eset$study_condition)]
+vogtmann <- curatedMetagenomicData("2021-03-31.VogtmannE_2016.relative_abundance", dryrun = FALSE, counts = TRUE)
+
+vm <- vogtmann$`2021-03-31.VogtmannE_2016.relative_abundance`
+
+vm.sub <- vm[,!is.na(vm$study_condition)]
 ```
 
 ```{r}
 table(vm.sub$study_condition, useNA="ifany")
 ```
 
-First we conduct a basic analysis to examine whether there are any statistically significant differences in taxa of microbiota by study condition. We use a forgiving alpha of 0.10 for adjusted p-values. We find 5 significant taxa in this crude analysis.
+First we conduct a basic analysis to examine whether there are any statistically significant differences in taxa of microbiota by study condition. We find 5 significant taxa in this crude analysis.
 
 ```{r, warning=FALSE, message=FALSE, results='hide'}
-vm.pseq <- ExpressionSet2phyloseq(vm.sub)
-dx_only <- phyloseq_to_deseq2(vm.pseq, ~ study_condition)
-dx_only <- DESeq(dx_only, test="Wald", fitType="parametric")
+#vm.pseq <- ExpressionSet2phyloseq(vm.sub)
+phylo <- makePhyloseqFromTreeSummarizedExperiment(vm.sub, abund_values = "relative_abundance")
+deseqds <- phyloseq_to_deseq2(phylo, ~study_condition)
+dx_only <- DESeq(deseqds, test="Wald", fitType="parametric")
 res <- results(dx_only, cooksCutoff = FALSE)
 alpha <- 0.10
 sigtab <- res[which(res$padj < alpha), ]
-sigtab <- cbind(as(sigtab, "data.frame"), as(tax_table(vm.pseq)[rownames(sigtab), ], "matrix"))
+sigtab <- cbind(as(sigtab, "data.frame"), as(tax_table(phylo)[rownames(sigtab), ], "matrix"))
 ```
 
 ```{r}
-sigtab
+head(sigtab)
 ```
 
 Next we adjust (deconfound) for categorized age. We find two significant results:
 
 ```{r, warning=FALSE, message=FALSE, results='hide'}
-dx_age <- phyloseq_to_deseq2(vm.pseq, ~ study_condition + age_category)
+dx_age <- phyloseq_to_deseq2(phylo, ~ study_condition + age_category)
 dx_age <- DESeq(dx_age, test="Wald", fitType="parametric")
 res = results(dx_age, cooksCutoff = FALSE, contrast=c("study_condition", "CRC", "control"))
 alpha = 0.10
 sigtab = res[which(res$padj < alpha), ]
-sigtab = cbind(as(sigtab, "data.frame"), as(tax_table(vm.pseq)[rownames(sigtab), ], "matrix"))
+sigtab = cbind(as(sigtab, "data.frame"), as(tax_table(phylo)[rownames(sigtab), ], "matrix"))
 ```
 
 ```{r}
-sigtab
+head(sigtab)
 ```
 
 Finally we add in gender. Again observing two significant results.
 
 ```{r, warning=FALSE, message=FALSE, results='hide'}
-dx_age_gender <- phyloseq_to_deseq2(vm.pseq, ~ study_condition + age_category + gender)
+dx_age_gender <- phyloseq_to_deseq2(phylo, ~ study_condition + age_category + gender)
 dx_age_gender <- DESeq(dx_age_gender, test="Wald", fitType="parametric")
 res = results(dx_age_gender, cooksCutoff = FALSE, contrast=c("study_condition", "CRC", "control"))
 alpha = 0.10
 sigtab = res[which(res$padj < alpha), ]
-sigtab = cbind(as(sigtab, "data.frame"), as(tax_table(vm.pseq)[rownames(sigtab), ], "matrix"))
+sigtab = cbind(as(sigtab, "data.frame"), as(tax_table(phylo)[rownames(sigtab), ], "matrix"))
 ```
 
 ```{r}
-sigtab
+head(sigtab)
 ```
 
 As mentioned in the confounding section, estimates obtained for the relationship between the exposure and the outcome have been adjusted for the included confounders (deconfounded). This means that the observed estimate is an averaged effect size across strata of the confounder(s).
