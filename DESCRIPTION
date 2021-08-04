@@ -41,7 +41,8 @@ Remotes:
     bioc::release/edgeR,
     bioc::release/curatedMetagenomicData,
     bioc::release/phyloseq,
-    bioc::release/Biobase
+    bioc::release/Biobase,
+    bioc::release/mia
 URL: https://chloemirzayi.com/epiforbioworkshop2021, https://cmirzayi.github.io/epiforbioworkshop2021/
 BugReports: https://github.com/cmirzayi/epiforbioworkshop2021/issues/new
 VignetteBuilder: knitr
